@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BankMS Neo | Modern Digital Banking & Ledger</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="navbar">
+      <a href="#" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-name">BANKMS <span class="brand-badge">NEO v2.0</span></div>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <a href="/docs" target="_blank" class="btn btn-glass btn-sm">
+          <span>📚 API Docs</span>
+        </a>
+        
+        <div id="authNavUser" class="hidden">
+          <div class="user-profile-pill" id="userProfileBtn">
+            <div class="avatar-initials" id="navAvatarInitials">AS</div>
+            <span id="navUsername" style="font-weight: 600; font-size: 0.875rem;">Alice</span>
+            <button class="btn btn-glass btn-sm" id="btnSignOut" style="margin-left: 0.5rem; padding: 0.2rem 0.6rem;">Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- UNAUTHENTICATED AUTH VIEW -->
+  <section id="authSection" class="auth-hero">
+    <div class="auth-box">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏦</div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;">Welcome to BankMS Neo</h2>
+        <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.35rem;">Secure, modern digital banking platform</p>
+      </div>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Sign In</div>
+        <div class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Create Account</div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="Enter your username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          <span>Sign In to Dashboard</span> ➔
+        </button>
+
+        <div class="demo-credentials-pill">
+          <div>
+            <strong>Quick Demo:</strong> <br>
+            <span class="font-mono" style="color: #fff;">alice</span> / <span class="font-mono" style="color: #fff;">password123</span>
+          </div>
+          <button type="button" class="btn btn-glass btn-sm" onclick="fillDemoCredentials('alice', 'password123')">Auto Fill</button>
+        </div>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="hidden">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="regFullName" class="form-control" placeholder="e.g. John Doe">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="regUsername" class="form-control" placeholder="Choose a username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (Optional)</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Minimum 4 characters" required autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn btn-emerald" style="width: 100%; margin-top: 0.5rem;">
+          <span>Create Account</span> ➔
+        </button>
+      </form>
+    </div>
+  </section>
+
+
+  <!-- AUTHENTICATED DASHBOARD VIEW -->
+  <main id="dashboardSection" class="container hidden">
+    
+    <!-- Welcome Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px;">
+          Good day, <span id="dashFullName" class="text-primary">Alice</span> 👋
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Account Overview & Financial Control Center</p>
+      </div>
+      <div>
+        <button class="btn btn-glass btn-sm" onclick="fetchDashboardData()">
+          <span>🔄 Refresh Live Data</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Top Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Balance & Stats Card -->
+      <div class="glass-card balance-card">
+        <div class="balance-header">
+          <div class="balance-title">TOTAL AVAILABLE BALANCE</div>
+          <button class="btn btn-glass btn-sm" id="toggleBalanceBtn" onclick="toggleBalanceVisibility()" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+            👁️ Hide
+          </button>
+        </div>
+
+        <div class="balance-amount">
+          <span id="balanceCurrency">$</span>
+          <span id="dashBalanceDisplay">0.00</span>
+        </div>
+
+        <div class="quick-stats-row">
+          <div class="stat-item stat-inflow">
+            <div class="stat-icon-wrapper">↓</div>
+            <div>
+              <div class="stat-label">Total Inflow / Deposits</div>
+              <div class="stat-val text-emerald" id="dashTotalInflow">+$0.00</div>
+            </div>
+          </div>
+          <div class="stat-item stat-outflow">
+            <div class="stat-icon-wrapper">↑</div>
+            <div>
+              <div class="stat-label">Total Outflow / Spending</div>
+              <div class="stat-val text-rose" id="dashTotalOutflow">-$0.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Virtual Debit Card Preview -->
+      <div class="virtual-debit-card">
+        <div class="card-top">
+          <div class="chip"></div>
+          <div class="card-logo">BANKMS NEO</div>
+        </div>
+        <div class="card-number">
+          <span id="virtualAccNumber" class="font-mono">•••• •••• ••••</span>
+          <button class="btn btn-glass btn-sm" onclick="copyAccountNumber()" title="Copy Account Number" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">
+            📋 Copy
+          </button>
+        </div>
+        <div class="card-bottom">
+          <div>
+            <div class="card-holder-title">CARD HOLDER</div>
+            <div class="card-holder-name" id="virtualCardHolder">ALICE STERLING</div>
+          </div>
+          <div style="text-align: right;">
+            <div class="card-holder-title">EXPIRES</div>
+            <div class="card-holder-name font-mono">12/29</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Action Bar -->
+    <div class="actions-container">
+      <div class="action-btn-card action-deposit" onclick="openModal('depositModal')">
+        <div class="action-icon">💰</div>
+        <div class="action-label">Cash In / Deposit</div>
+      </div>
+      <div class="action-btn-card action-withdraw" onclick="openModal('withdrawModal')">
+        <div class="action-icon">🏧</div>
+        <div class="action-label">Cash Out / Withdraw</div>
+      </div>
+      <div class="action-btn-card action-transfer" onclick="openModal('transferModal')">
+        <div class="action-icon">🚀</div>
+        <div class="action-label">Send / Transfer</div>
+      </div>
+      <div class="action-btn-card action-history" onclick="exportTransactionsCSV()">
+        <div class="action-icon">📊</div>
+        <div class="action-label">Export Statement</div>
+      </div>
+    </div>
+
+    <!-- Visual Chart & Transaction History Grid -->
+    <div class="content-grid">
+      
+      <!-- Analytics Chart -->
+      <div class="glass-card" style="margin-bottom: 2rem;">
+        <div class="section-header">
+          <div class="section-title">📈 Cash Flow Analytics</div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Inflow vs Outflow Ratio</span>
+        </div>
+        <div style="height: 220px; position: relative;">
+          <canvas id="cashflowChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Transaction History Table -->
+      <div class="glass-card">
+        <div class="section-header">
+          <div class="section-title">
+            <span>📑 Transaction Ledger</span>
+          </div>
+
+          <!-- Filters and Search -->
+          <div class="filter-bar">
+            <input type="text" id="txnSearchInput" class="search-input" placeholder="Search reference or note..." onkeyup="filterTransactions()">
+            <div class="filter-chip active" onclick="setTxnFilter('ALL', this)">All</div>
+            <div class="filter-chip" onclick="setTxnFilter('DEPOSIT', this)">Deposits</div>
+            <div class="filter-chip" onclick="setTxnFilter('WITHDRAWAL', this)">Withdrawals</div>
+            <div class="filter-chip" onclick="setTxnFilter('TRANSFER', this)">Transfers</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="txn-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Type</th>
+                <th>Sender / Recipient</th>
+                <th>Note</th>
+                <th>Date & Time</th>
+                <th>Amount</th>
+                <th>Balance After</th>
+              </tr>
+            </thead>
+            <tbody id="txnTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+          <div id="txnEmptyState" class="empty-state hidden">
+            <div class="empty-state-icon">📭</div>
+            <div>No transactions recorded yet. Make a deposit or transfer to get started!</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Deposit (Cash In) Modal -->
+  <div class="modal-overlay" id="depositModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">💰 Cash In (Deposit Funds)</div>
+        <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
+      </div>
+      <form id="depositForm" onsubmit="handleDeposit(event)">
+        <div class="form-group">
+          <label class="form-label">Deposit Amount ($)</label>
+          <div class="input-with-icon">
+            <span class="input-prefix">$</span>
+            <input type="number" step="0.01" min="1" id="depositAmount" class="form-control" placeholder="0.00" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note / Description (Optional)</label>
+          <input type="text" id="depositNote" class="form-control" placeholder="e.g. Salary deposit, ATM cash-in">
+        </div>
+        <button type="submit" class="btn btn-emerald" style="width: 100%;">Confirm Deposit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Withdraw (Cash Out) Modal -->
+  <div class="modal-overlay" id="withdrawModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🏧 Cash Out (Withdraw Funds)</div>
+        <button class="modal-close" onclick="closeModal('withdrawModal')">&times;</button>
+      </div>
+      <form id="withdrawForm" onsubmit="handleWithdraw(event)">
+        <div class="form-group">
+          <label class="form-label">Withdrawal Amount ($)</label>
+          <div class="input-with-icon">
+            <span class="input-prefix">$</span>
+            <input type="number" step="0.01" min="1" id="withdrawAmount" class="form-control" placeholder="0.00" required>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
+            Available Balance: <strong id="withdrawMaxBalance">$0.00</strong>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note / Reason (Optional)</label>
+          <input type="text" id="withdrawNote" class="form-control" placeholder="e.g. ATM withdrawal, grocery expense">
+        </div>
+        <button type="submit" class="btn btn-rose" style="width: 100%;">Confirm Withdrawal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Transfer (Send Funds) Modal -->
+  <div class="modal-overlay" id="transferModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🚀 Send Money / P2P Transfer</div>
+        <button class="modal-close" onclick="closeModal('transferModal')">&times;</button>
+      </div>
+      <form id="transferForm" onsubmit="handleTransfer(event)">
+        <div class="form-group">
+          <label class="form-label">Recipient Username or 10-Digit Account #</label>
+          <input type="text" id="transferRecipient" class="form-control" placeholder="e.g. bob or 5519203941" required oninput="debounceLookupRecipient()">
+          <div id="recipientLookupBox" class="recipient-preview-box hidden">
+            <span id="recipientLookupText">Checking recipient...</span>
+            <span id="recipientLookupBadge" class="txn-type-badge badge-deposit">Verified</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount ($)</label>
+          <div class="input-with-icon">
+            <span class="input-prefix">$</span>
+            <input type="number" step="0.01" min="0.01" id="transferAmount" class="form-control" placeholder="0.00" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transfer Purpose / Note</label>
+          <input type="text" id="transferNote" class="form-control" placeholder="e.g. Project payment, rent split">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Send Funds Now</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- App Script -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
